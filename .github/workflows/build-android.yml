@@ -1,52 +1,57 @@
-name: Build Android APK
 
+Copiar
+
+name: Build Android APK
+ 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
+ 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+ 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
+ 
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+ 
       - name: Install dependencies
         run: npm install
-
+ 
       - name: Install Capacitor Android
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
-
+ 
       - name: Build React app
         run: npm run build
-
+ 
       - name: Init Capacitor
         run: npx cap init CQApp com.cqlab.app --web-dir=dist
-
+ 
       - name: Add Android platform
-        run: npx cap add android
-
-      - name: Replace Android project with clean template
         run: |
-          # Remove pasta android para garantir recriação limpa
           rm -rf android
           npx cap add android
-
+ 
       - name: Fix build.gradle (root)
         run: |
           cat > android/build.gradle << 'EOF'
           buildscript {
-              ext.kotlin_version = '1.8.22'
+              ext.kotlin_version = '2.0.21'
               repositories {
                   google()
                   mavenCentral()
               }
               dependencies {
-                  classpath 'com.android.tools.build:gradle:8.2.0'
+                  classpath 'com.android.tools.build:gradle:8.9.1'
                   classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
               }
           }
@@ -60,23 +65,32 @@ jobs:
               delete rootProject.buildDir
           }
           EOF
-
+ 
+      - name: Fix gradle wrapper version
+        run: |
+          cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-all.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+ 
       - name: Fix app/build.gradle
         run: |
           cat > android/app/build.gradle << 'EOF'
           apply plugin: 'com.android.application'
           apply plugin: 'kotlin-android'
-
+ 
           android {
-              compileSdk 34
+              compileSdk 36
               namespace "com.cqlab.app"
               defaultConfig {
                   applicationId "com.cqlab.app"
-                  minSdk 21
-                  targetSdk 34
+                  minSdk 22
+                  targetSdk 36
                   versionCode 1
                   versionName "1.0"
-                  testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
               }
               buildTypes {
                   release {
@@ -85,27 +99,24 @@ jobs:
                   }
               }
               compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
+                  sourceCompatibility JavaVersion.VERSION_21
+                  targetCompatibility JavaVersion.VERSION_21
               }
               kotlinOptions {
-                  jvmTarget = '17'
+                  jvmTarget = '21'
               }
           }
-
+ 
           dependencies {
               implementation project(':capacitor-android')
-              implementation 'androidx.core:core-ktx:1.12.0'
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'com.google.android.material:material:1.11.0'
-              implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-              testImplementation 'junit:junit:4.13.2'
-              androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-              androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+              implementation 'androidx.core:core-ktx:1.17.0'
+              implementation 'androidx.appcompat:appcompat:1.7.0'
+              implementation 'com.google.android.material:material:1.12.0'
+              implementation 'androidx.activity:activity:1.11.0'
           }
           EOF
-
-      - name: Create missing resources
+ 
+      - name: Create resources
         run: |
           mkdir -p android/app/src/main/res/values
           cat > android/app/src/main/res/values/strings.xml << 'EOF'
@@ -118,9 +129,9 @@ jobs:
           cat > android/app/src/main/res/values/colors.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <color name="colorPrimary">#6200EE</color>
-              <color name="colorPrimaryDark">#3700B3</color>
-              <color name="colorAccent">#03DAC5</color>
+              <color name="colorPrimary">#2563EB</color>
+              <color name="colorPrimaryDark">#1D4ED8</color>
+              <color name="colorAccent">#10B981</color>
           </resources>
           EOF
           cat > android/app/src/main/res/values/styles.xml << 'EOF'
@@ -131,27 +142,26 @@ jobs:
                   <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
                   <item name="colorAccent">@color/colorAccent</item>
               </style>
-              <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+              <style name="AppTheme.NoActionBarLaunch" parent="Theme.AppCompat.Light.NoActionBar">
                   <item name="android:background">@color/colorPrimary</item>
-              </style>
-              <style name="Theme.SplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
-                  <item name="android:windowBackground">@color/colorPrimary</item>
                   <item name="android:windowFullscreen">true</item>
               </style>
           </resources>
           EOF
-
+ 
       - name: Fix AndroidManifest.xml
         run: |
           cat > android/app/src/main/AndroidManifest.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
               <application
                   android:allowBackup="true"
                   android:icon="@mipmap/ic_launcher"
                   android:label="@string/app_name"
                   android:roundIcon="@mipmap/ic_launcher_round"
                   android:supportsRtl="true"
+                  android:usesCleartextTraffic="true"
                   android:theme="@style/AppTheme">
                   <activity
                       android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
@@ -167,7 +177,7 @@ jobs:
               </application>
           </manifest>
           EOF
-
+ 
       - name: Fix MainActivity
         run: |
           mkdir -p android/app/src/main/java/com/cqlab/app
@@ -176,34 +186,27 @@ jobs:
           import com.getcapacitor.BridgeActivity;
           public class MainActivity extends BridgeActivity {}
           EOF
-
-      - name: Generate dummy icons
+ 
+      - name: Generate icons
         run: |
-          mkdir -p android/app/src/main/res/mipmap-hdpi
-          echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > android/app/src/main/res/mipmap-hdpi/ic_launcher.png
-          for dir in mipmap-mdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi; do
+          for dir in mipmap-hdpi mipmap-mdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi; do
             mkdir -p android/app/src/main/res/$dir
-            cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/$dir/ic_launcher.png
-            cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/$dir/ic_launcher_round.png
+            echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > android/app/src/main/res/$dir/ic_launcher.png
+            cp android/app/src/main/res/$dir/ic_launcher.png android/app/src/main/res/$dir/ic_launcher_round.png
           done
-
+ 
       - name: Sync Capacitor
         run: npx cap sync android
-
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
+ 
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
-
+          ./gradlew assembleDebug --no-daemon
+ 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: cqlab-app
+          name: cqlab-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+ 
