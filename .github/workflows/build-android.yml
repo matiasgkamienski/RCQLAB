@@ -1,4 +1,4 @@
-name: Build Android APK (completo)
+name: Build Android APK (completo + recursos)
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
-      - name: Corrige build.gradle (raiz)
+      - name: Criar build.gradle (raiz)
         run: |
           cat > android/build.gradle << 'EOF'
           buildscript {
@@ -55,19 +55,19 @@ jobs:
           }
           EOF
 
-      - name: Corrige app/build.gradle
+      - name: Criar app/build.gradle
         run: |
           cat > android/app/build.gradle << 'EOF'
           apply plugin: 'com.android.application'
           apply plugin: 'kotlin-android'
 
           android {
-              compileSdkVersion 34
+              compileSdk 34
               namespace "com.cqlab.app"
               defaultConfig {
                   applicationId "com.cqlab.app"
-                  minSdkVersion 21
-                  targetSdkVersion 34
+                  minSdk 21
+                  targetSdk 34
                   versionCode 1
                   versionName "1.0"
                   testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -96,6 +96,27 @@ jobs:
               androidTestImplementation 'androidx.test.ext:junit:1.1.5'
               androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
           }
+          EOF
+
+      - name: Criar arquivos de recursos (cores, estilos)
+        run: |
+          mkdir -p android/app/src/main/res/values
+          cat > android/app/src/main/res/values/colors.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="colorPrimary">#6200EE</color>
+              <color name="colorPrimaryDark">#3700B3</color>
+              <color name="colorAccent">#03DAC5</color>
+          </resources>
+          EOF
+          cat > android/app/src/main/res/values/styles.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="Theme.SplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
+                  <item name="android:windowBackground">@color/colorPrimary</item>
+                  <item name="android:windowFullscreen">true</item>
+              </style>
+          </resources>
           EOF
 
       - name: Sync Android
