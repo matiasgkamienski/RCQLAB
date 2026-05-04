@@ -30,13 +30,29 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
-      - name: Fix missing resources and dependencies
+      - name: Criar todos os recursos Android necessários
         run: |
-          # Adiciona dependência do Capacitor no app/build.gradle
-          sed -i '/dependencies {/a\    implementation project(":capacitor-android")' android/app/build.gradle
+          # Remove package do manifest (conflito com namespace)
+          sed -i 's/package="com.cqlab.app"//' android/app/src/main/AndroidManifest.xml
+
+          # Garante que o MainActivity use a classe correta do Capacitor
+          cat > android/app/src/main/java/com/cqlab/app/MainActivity.java << 'EOF'
+          package com.cqlab.app;
+          import com.getcapacitor.BridgeActivity;
+          public class MainActivity extends BridgeActivity {}
+          EOF
+
+          # Cria strings.xml com todos os textos necessários
+          mkdir -p android/app/src/main/res/values
+          cat > android/app/src/main/res/values/strings.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">CQLab</string>
+              <string name="title_activity_main">CQLab</string>
+          </resources>
+          EOF
 
           # Cria cores
-          mkdir -p android/app/src/main/res/values
           cat > android/app/src/main/res/values/colors.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
@@ -46,7 +62,7 @@ jobs:
           </resources>
           EOF
 
-          # Cria estilos (incluindo AppTheme e SplashScreen)
+          # Cria estilos
           cat > android/app/src/main/res/values/styles.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
@@ -65,17 +81,10 @@ jobs:
           </resources>
           EOF
 
-          # Cria strings.xml
-          cat > android/app/src/main/res/values/strings.xml << 'EOF'
-          <resources>
-              <string name="app_name">CQLab</string>
-          </resources>
-          EOF
+          # Adiciona dependência do Capacitor no app/build.gradle
+          sed -i '/dependencies {/a\    implementation project(":capacitor-android")' android/app/build.gradle
 
-          # Remove package do AndroidManifest para evitar conflito com namespace
-          sed -i 's/package="com.cqlab.app"//' android/app/src/main/AndroidManifest.xml
-
-          # Cria ícones placeholder (opcional, evita warnings)
+          # Cria ícones placeholder (evita warnings)
           mkdir -p android/app/src/main/res/mipmap-hdpi
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > android/app/src/main/res/mipmap-hdpi/ic_launcher.png
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
@@ -83,14 +92,21 @@ jobs:
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 
+          # Cria versões redondas dos ícones
+          cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-xhdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+          cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+
       - name: Sync Android
         run: npx cap sync android
 
-      - name: Setup Java 17
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Build APK
         run: |
