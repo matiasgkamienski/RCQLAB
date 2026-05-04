@@ -30,7 +30,7 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
-      - name: Criar todos os recursos Android necessários
+      - name: Criar todos os recursos Android e corrigir conflitos Kotlin
         run: |
           # Remove package do manifest (conflito com namespace)
           sed -i 's/package="com.cqlab.app"//' android/app/src/main/AndroidManifest.xml
@@ -84,20 +84,57 @@ jobs:
           # Adiciona dependência do Capacitor no app/build.gradle
           sed -i '/dependencies {/a\    implementation project(":capacitor-android")' android/app/build.gradle
 
-          # Cria ícones placeholder (evita warnings)
+          # Cria ícones placeholder
           mkdir -p android/app/src/main/res/mipmap-hdpi
           echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > android/app/src/main/res/mipmap-hdpi/ic_launcher.png
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-
-          # Cria versões redondas dos ícones
           cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
           cp android/app/src/main/res/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
           cp android/app/src/main/res/mipmap-xhdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
           cp android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
           cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+
+          # Configura o build.gradle da raiz para forçar versões do Kotlin e resolver conflitos
+          cat > android/build.gradle << 'EOF'
+          buildscript {
+              ext.kotlin_version = '1.8.22'
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.2.0'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              configurations.all {
+                  resolutionStrategy {
+                      force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+                      force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+                      force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+                  }
+              }
+          }
+          task clean(type: Delete) {
+              delete rootProject.buildDir
+          }
+          EOF
+
+          # No app/build.gradle, adicionamos a exclusão de dependências conflitantes
+          cat >> android/app/build.gradle << 'EOF'
+          configurations.all {
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+          }
+          EOF
 
       - name: Sync Android
         run: npx cap sync android
