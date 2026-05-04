@@ -81,7 +81,7 @@ jobs:
           android.suppressUnsupportedCompileSdk=36
           EOF
 
-      - name: Fix app/build.gradle
+      - name: Fix app/build.gradle (minSdk 24)
         run: |
           cat > android/app/build.gradle << 'EOF'
           apply plugin: 'com.android.application'
@@ -92,7 +92,7 @@ jobs:
               namespace "com.cqlab.app"
               defaultConfig {
                   applicationId "com.cqlab.app"
-                  minSdk 21
+                  minSdk 24
                   targetSdk 36
                   versionCode 1
                   versionName "1.0"
