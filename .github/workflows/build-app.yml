@@ -1,0 +1,75 @@
+name: Build Mobile App (APK & IPA)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Install Capacitor
+        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+      - name: Build React app
+        run: npm run build
+      - name: Initialize Capacitor
+        run: npx cap init CQLab com.cqlab.app --web-dir=dist
+      - name: Add Android platform
+        run: npx cap add android
+      - name: Sync Android project
+        run: npx cap sync android
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+  build-ios:
+    runs-on: macos-latest  # necessário para compilar iOS
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install
+      - name: Install Capacitor iOS
+        run: npm install @capacitor/core @capacitor/cli @capacitor/ios
+      - name: Build React app
+        run: npm run build
+      - name: Initialize Capacitor
+        run: npx cap init CQLab com.cqlab.app --web-dir=dist
+      - name: Add iOS platform
+        run: npx cap add ios
+      - name: Sync iOS project
+        run: npx cap sync ios
+      - name: Install CocoaPods
+        run: |
+          cd ios/App
+          pod install
+      - name: Build iOS (simulator)
+        run: |
+          cd ios
+          xcodebuild -workspace App.xcworkspace -scheme App -destination 'generic/platform=iOS' -configuration Debug build
+      - name: Upload .app (simulator)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-build
+          path: ios/build/Products/Debug-iphonesimulator/App.app
