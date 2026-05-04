@@ -1,6 +1,4 @@
-import { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
+const config = {
   appId: 'com.cqlab.app',
   appName: 'CQLab',
   webDir: 'dist',
@@ -11,7 +9,7 @@ const config: CapacitorConfig = {
     minVersion: '13.0'
   },
   android: {
-    minVersion: '21'   // Android 5.0+
+    minVersion: '21'
   }
 };
 
