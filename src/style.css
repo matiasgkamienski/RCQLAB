@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap');
 
 /* ============================================
-   CQ LAB - DESIGN NEUTRO (RESPEITA O TEMA REACT)
+   CQ LAB - DESIGN PREMIUM (TEMA DINÂMICO)
    ============================================ */
 
 * {
@@ -12,137 +12,175 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  /* Não definir cor de fundo nem texto aqui – quem define é o React via state dark */
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Container principal – apenas margens e max-width, sem cor */
+/* Container principal – respiração lateral */
 body > div:first-child {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 24px;
 }
 
-/* ========== TOPBAR (header) ========== */
-/* Aplica apenas borda inferior sutil e sombra – cores vêm do React */
+/* ========== TOPBAR ========== */
 div[style*="height: 56px"][style*="display: flex"] {
-  border-radius: 0 !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 20px !important;
+  margin-bottom: 20px !important;
+  padding: 0 24px !important;
+  transition: all 0.2s ease;
 }
 
 /* ========== CARDS ========== */
-/* Remove qualquer override de background/cor – deixa o React controlar */
 div[style*="background"][style*="border-radius"][style*="padding"] {
-  backdrop-filter: none !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1) !important;
+  backdrop-filter: blur(2px);
+  border-width: 1px !important;
 }
 
 div[style*="background"][style*="border-radius"][style*="padding"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.25) !important;
+  border-color: rgba(59, 130, 246, 0.5) !important;
 }
 
-/* ========== INPUTS E SELECTS ========== */
-/* Apenas foco e transições – cores e bordas já estão no inline do React */
+/* ========== INPUTS & SELECTS ========== */
+input, select, textarea {
+  transition: all 0.2s ease !important;
+  font-weight: 500 !important;
+}
+
 input:focus, select:focus, textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-  transition: all 0.2s;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2), 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
 }
 
 /* ========== BOTÕES ========== */
 button {
-  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1) !important;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.2) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+}
+
+button:active::after {
+  width: 120%;
+  height: 120%;
 }
 
 button:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.01);
   filter: brightness(1.02);
+}
+
+/* Botão de logout – estilo especial */
+button[style*="color: #ef4444"] {
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
 }
 
 /* ========== TABELAS ========== */
 table {
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-  border-radius: 16px !important;
+  border-radius: 20px !important;
   overflow: hidden !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+  transition: all 0.2s;
 }
 
 thead th {
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  font-size: 11px !important;
-  letter-spacing: 1px !important;
-  padding: 14px 16px !important;
+  font-size: 12px !important;
+  padding: 16px 20px !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  letter-spacing: 0.08em;
 }
 
 tbody tr {
-  transition: background 0.15s !important;
+  transition: all 0.15s ease !important;
+}
+
+tbody tr:hover {
+  transform: scale(1.002);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 tbody td {
-  padding: 12px 16px !important;
-  font-size: 13px !important;
+  padding: 14px 20px !important;
+  font-size: 13.5px !important;
 }
 
-/* ========== BADGES DE STATUS ========== */
-/* Melhorar aparência – cores ainda vêm do React, apenas arredondamos e padding */
-span[style*="background: rgba(239,68,68,0.12)"] {
-  border-radius: 40px !important;
-  padding: 4px 12px !important;
-  font-weight: 700 !important;
-  font-size: 11px !important;
-  letter-spacing: 0.3px;
-}
-
-span[style*="background: rgba(245,158,11,0.12)"] {
-  border-radius: 40px !important;
-  padding: 4px 12px !important;
-  font-weight: 700 !important;
-}
-
+/* ========== BADGES ========== */
+span[style*="background: rgba(239,68,68,0.12)"],
+span[style*="background: rgba(245,158,11,0.12)"],
 span[style*="background: rgba(16,185,129,0.12)"] {
-  border-radius: 40px !important;
-  padding: 4px 12px !important;
-  font-weight: 700 !important;
+  border-radius: 30px !important;
+  padding: 5px 14px !important;
+  font-weight: 600 !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.02em;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ========== SIDEBAR ========== */
-/* Apenas sombra e transição – cores vêm do React */
 aside {
-  transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1) !important;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 6px 0 24px -12px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(12px);
 }
 
 aside button {
   transition: all 0.2s ease !important;
-  border-radius: 12px !important;
+  border-radius: 14px !important;
+  font-weight: 500 !important;
 }
 
 aside button:hover {
-  transform: translateX(4px) !important;
+  transform: translateX(5px);
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+aside button[style*="background: #2563eb"] {
+  background: linear-gradient(105deg, #2563eb, #1e40af) !important;
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4) !important;
 }
 
 /* ========== ABAS (PASTAS) ========== */
-/* Melhorar bordas e transições – cores já controladas pelo React nos botões */
 div[style*="display: flex"][style*="gap: 6px"] button,
 div[style*="display: flex"][style*="gap: 6"] button {
-  transition: all 0.2s !important;
+  transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.2) !important;
+  font-weight: 600 !important;
+  backdrop-filter: blur(4px);
 }
 
 div[style*="display: flex"][style*="gap: 6px"] button:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   filter: brightness(0.96);
 }
 
 /* ========== TOAST ========== */
 div[style*="position: fixed"][style*="bottom: 28px"] {
-  border-radius: 40px !important;
+  border-radius: 60px !important;
   font-weight: 600 !important;
-  backdrop-filter: blur(8px);
-  animation: slideUpFade 0.3s ease forwards !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: slideUpFade 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards !important;
 }
 
 @keyframes slideUpFade {
@@ -158,20 +196,47 @@ div[style*="position: fixed"][style*="bottom: 28px"] {
 
 /* ========== MODAL ========== */
 div[style*="position: fixed"][style*="inset: 0"] > div {
-  border-radius: 24px !important;
+  border-radius: 32px !important;
   transition: transform 0.2s;
+  animation: modalPop 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.2);
 }
 
-/* ========== FILTROS E SELECTS ADICIONAIS ========== */
-/* Melhorar aparência dos selects de filtro no tema claro */
-select, input {
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ========== PAGINAÇÃO ========== */
+div[style*="justifyContent: center"][style*="gap: 8px"] button {
+  transition: all 0.2s ease !important;
+}
+
+div[style*="justifyContent: center"][style*="gap: 8px"] button:hover {
+  transform: translateY(-1px);
+  background: #2563eb !important;
+  color: white !important;
+  border-color: #2563eb !important;
+}
+
+/* ========== FILTROS ========== */
+/* Aplica um leve espaçamento e borda mais elegante nos filtros */
+div[style*="display: flex"][style*="gap: 8px"][style*="marginBottom"] select,
+div[style*="display: flex"][style*="gap: 8px"][style*="marginBottom"] input {
+  border-radius: 40px !important;
+  padding: 10px 18px !important;
   cursor: pointer;
 }
 
-/* ========== SCROLLBAR ========== */
+/* ========== SCROLLBAR (premium) ========== */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -180,8 +245,9 @@ select, input {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.6);
+  background: rgba(59, 130, 246, 0.5);
   border-radius: 10px;
+  transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -196,7 +262,7 @@ select, input {
 
   table thead th,
   table tbody td {
-    padding: 8px 10px !important;
+    padding: 10px 12px !important;
     font-size: 12px !important;
   }
 
@@ -206,11 +272,52 @@ select, input {
   }
 
   aside {
-    width: 220px !important;
+    width: 240px !important;
+  }
+
+  div[style*="display: flex"][style*="gap: 6px"] button {
+    padding: 6px 14px !important;
+    font-size: 12px !important;
   }
 }
 
-/* ========== MELHORIAS NOS GRÁFICOS ========== */
+/* ========== LOADING SPINNER ========== */
+div[style*="border: 3px solid #2563eb"] {
+  border-width: 3px !important;
+  border-style: solid !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+  border-top-color: #3b82f6 !important;
+  animation: spin 0.8s linear infinite !important;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========== GRÁFICOS (BARCHART) ========== */
 div[style*="display: flex"][style*="align-items: flex-end"] > div > div {
-  transition: height 0.3s ease-out !important;
+  transition: height 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2) !important;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+/* ========== MELHORIAS ADICIONAIS ========== */
+/* Badge de contagem na sidebar (vencidos) */
+aside button span[style*="background: #ef4444"] {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+  font-weight: 800;
+}
+
+/* Input de busca com ícone */
+div[style*="position: relative"] input {
+  padding-left: 38px !important;
+}
+
+/* Melhora na exibição de empresas na admin */
+div[style*="display: flex"][style*="flexWrap: wrap"][style*="gap: 8px"] span {
+  transition: all 0.2s;
+  cursor: default;
+}
+div[style*="display: flex"][style*="flexWrap: wrap"][style*="gap: 8px"] span:hover {
+  transform: translateY(-1px);
+  background: rgba(59, 130, 246, 0.2) !important;
 }
