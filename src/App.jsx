@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import logoEmpresa from "./logo.png";
+import logoEmpresa from "./logo Dynatech.png";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
